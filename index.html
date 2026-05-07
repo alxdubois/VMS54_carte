@@ -533,15 +533,17 @@
             'Autres':     'Autre'
         };
 
-        function applyTypeFilter() {
-            layer_Typetablissement_3.eachLayer(function(marker) {
-                if (!marker.feature || !marker.feature.properties) return;
-                var t = marker.feature.properties['Type_etab'] || '';
-                var show = typeFilterState[t] !== false;
-                if (marker.setStyle) marker.setStyle({opacity: show ? 0.9 : 0, fillOpacity: show ? 0.8 : 0});
-                if (marker._icon) marker._icon.style.display = show ? '' : 'none';
-            });
-        }
+function applyTypeFilter() {
+    layer_Typetablissement_3.eachLayer(function(marker) {
+        if (!marker.feature || !marker.feature.properties) return;
+        var t = marker.feature.properties['Type_etab'] || '';
+        var show = typeFilterState[t] !== false;
+        if (marker.setStyle) marker.setStyle({opacity: show ? 0.9 : 0, fillOpacity: show ? 0.8 : 0});
+        if (marker._icon) marker._icon.style.display = show ? '' : 'none';
+        // ✅ Désactive/réactive les clics sur l'élément SVG
+        if (marker._path) marker._path.style.pointerEvents = show ? '' : 'none';
+    });
+}
 
         function injectLegendCheckboxes() {
             var tds = document.querySelectorAll('.leaflet-control-layers td');
