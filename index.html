@@ -23,68 +23,8 @@
         </style>
         <title>Les écoles à proximité des Voies SNCF (Grand Est)</title>
     </head>
-    <!-- Modale tableau -->
-<div id="modalTable" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;
-     background:rgba(0,0,0,0.5);z-index:9999;justify-content:center;align-items:center;">
-  <div style="background:#fff;width:90%;max-height:80vh;border-radius:8px;
-              overflow:auto;padding:20px;position:relative;">
-    <button onclick="document.getElementById('modalTable').style.display='none'"
-      style="position:absolute;top:10px;right:15px;font-size:18px;cursor:pointer;
-             background:none;border:none;">✖</button>
-    <h3>📋 Table des établissements</h3>
-    <div id="tableContainer">Chargement...</div>
-  </div>
-</div>
-
-<script>
-// Génère le tableau depuis les données GeoJSON déjà chargées dans la carte
-window.addEventListener('load', function() {
-  // Adapter "layer_nom" au nom réel de votre couche dans le JS
-  // Cherchez dans js/ le nom de la variable contenant vos établissements
-  setTimeout(function() {
-    var features = []; // sera rempli ci-dessous
-
-    // Parcourt toutes les couches Leaflet pour trouver les établissements
-    map.eachLayer(function(layer) {
-      if (layer.feature) features.push(layer.feature);
-      if (layer.getLayers) {
-        layer.getLayers().forEach(function(l) {
-          if (l.feature) features.push(l.feature);
-        });
-      }
-    });
-
-    if (features.length === 0) {
-      document.getElementById('tableContainer').innerHTML = '<p>Aucune donnée trouvée.</p>';
-      return;
-    }
-
-    // Récupère les colonnes depuis le premier feature
-    var cols = Object.keys(features[0].properties);
-    var html = '<table border="1" style="border-collapse:collapse;width:100%;font-size:13px;">';
-    html += '<thead><tr style="background:#4a90d9;color:#fff;">';
-    cols.forEach(function(c) { html += '<th style="padding:6px 10px;">' + c + '</th>'; });
-    html += '</tr></thead><tbody>';
-
-    features.forEach(function(f, i) {
-      html += '<tr style="background:' + (i%2===0?'#f5f5f5':'#fff') + '">';
-      cols.forEach(function(c) { html += '<td style="padding:5px 10px;">' + (f.properties[c] ?? '') + '</td>'; });
-      html += '</tr>';
-    });
-    html += '</tbody></table>';
-    document.getElementById('tableContainer').innerHTML = html;
-  }, 1000);
-});
-</script>
-	<body>
-        <!-- Bouton table des données -->
-<button id="btnTable" onclick="document.getElementById('modalTable').style.display='flex'"
-  style="position:absolute;top:80px;left:10px;z-index:1000;
-         padding:8px 12px;background:#fff;border:2px solid #aaa;
-         border-radius:4px;cursor:pointer;font-weight:bold;box-shadow:2px 2px 5px rgba(0,0,0,0.3)">
-  📋 Table des établissements
-</button>
-		<div id="map">
+    <body>
+        <div id="map">
         </div>
         <script src="js/qgis2web_expressions.js"></script>
         <script src="js/leaflet.js"></script>
