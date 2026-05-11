@@ -504,7 +504,7 @@
         setBounds();
                        // ===== FILTRES INTÉGRÉS DANS LA LÉGENDE =====
 
-        // ===== FILTRES AVEC COMPTAGE DYNAMIQUE ET CHECKBOXES =====
+        // ===== FILTRES AVEC COMPTAGE DYNAMIQUE ET INTERACTIF =====
 
 var typeFilterState = {
     'Ecole primaire':  true,
@@ -529,6 +529,7 @@ function updateCounts() {
 
     var bounds = map.getBounds();
 
+    // On compte uniquement ce qui est géographiquement dans la vue
     layer_Typetablissement_3.eachLayer(function(l) {
         if (l.feature && bounds.contains(l.getLatLng())) {
             var t = l.feature.properties['Type_etab'];
@@ -536,21 +537,25 @@ function updateCounts() {
         }
     });
 
-    // On parcourt les headers de l'arbre de couches
-    document.querySelectorAll('.leaflet-layerstree-header').forEach(function(header) {
-        var labelSpan = header.querySelector('span:last-child') || header;
-        var labelText = labelSpan.textContent.trim();
-
-        if (legendToType[labelText]) {
-            var typeVal = legendToType[labelText];
-            var badge = header.querySelector('.count-badge');
-            if (!badge) {
-                badge = document.createElement('span');
-                badge.className = 'count-badge';
-                badge.style.cssText = 'margin-left:5px; font-weight:bold; color:#e31a1c; font-size:0.9em;';
-                header.appendChild(badge);
+    // Mise à jour de l'affichage dans la légende sans toucher aux checkboxes
+    document.querySelectorAll('.leaflet-control-layers td').forEach(function(td) {
+        // On récupère le texte pur (sans le contenu des balises enfants)
+        var labelNode = Array.from(td.childNodes).find(n => n.nodeType === Node.TEXT_NODE);
+        if (labelNode) {
+            var labelText = labelNode.textContent.trim();
+            if (legendToType[labelText]) {
+                var typeVal = legendToType[labelText];
+                
+                // On crée ou met à jour le badge de comptage
+                var badge = td.querySelector('.count-badge');
+                if (!badge) {
+                    badge = document.createElement('span');
+                    badge.className = 'count-badge';
+                    badge.style.cssText = 'margin-left:5px; font-size:0.85em; font-weight:bold; color:#d32f2f;';
+                    td.appendChild(badge);
+                }
+                badge.textContent = ' (' + counts[typeVal] + ')';
             }
-            badge.textContent = ' (' + counts[typeVal] + ')';
         }
     });
 }
@@ -561,57 +566,51 @@ function applyTypeFilter() {
         var t = marker.feature.properties['Type_etab'] || '';
         var isChecked = typeFilterState[t] !== false;
         
+        // On gère l'affichage sur la carte
         if (marker.setStyle) {
             marker.setStyle({
                 opacity: isChecked ? 1 : 0,
-                fillOpacity: isChecked ? 1 : 0
+                fillOpacity: isChecked ? 1 : 0,
+                interactive: isChecked // Empêche de cliquer sur un point invisible
             });
         }
         if (marker._icon) marker._icon.style.display = isChecked ? '' : 'none';
     });
-    updateCounts();
 }
 
 function injectLegendCheckboxes() {
-    // Ciblage précis des lignes de la légende qgis2web (Tree Layers)
-    document.querySelectorAll('.leaflet-layerstree-header').forEach(function(header) {
-        // On cherche le texte à l'intérieur du span du label
-        var labelSpan = header.querySelector('.leaflet-layerstree-label') || header;
-        var labelText = labelSpan.textContent.trim();
-
-        if (legendToType[labelText] && !header.querySelector('.filter-check')) {
+    document.querySelectorAll('.leaflet-control-layers td').forEach(function(td) {
+        var labelText = td.textContent.trim();
+        if (legendToType[labelText] && !td.querySelector('input[type="checkbox"]')) {
             var typeVal = legendToType[labelText];
             
             var cb = document.createElement('input');
             cb.type = 'checkbox';
-            cb.className = 'filter-check';
             cb.checked = true;
-            cb.style.cssText = 'cursor:pointer; margin-right:5px; vertical-align:middle; width:13px; height:13px;';
+            cb.style.cssText = 'cursor:pointer; margin-right:8px; vertical-align:middle;';
             
             cb.addEventListener('change', function(e) {
                 e.stopPropagation();
                 typeFilterState[typeVal] = cb.checked;
-                header.style.opacity = cb.checked ? '1' : '0.4';
+                // Effet visuel sur la ligne de la légende
+                td.closest('tr').style.opacity = cb.checked ? '1' : '0.5';
                 applyTypeFilter();
             });
 
-            // On insère avant le texte
-            header.insertBefore(cb, header.firstChild);
+            // On insère la checkbox AU DÉBUT du texte pour ne pas gêner
+            td.insertBefore(cb, td.firstChild);
         }
     });
+    updateCounts();
 }
 
-// Ré-injection si l'utilisateur ouvre/ferme des groupes dans l'arbre
-map.on('layeradd layerremove moveend zoomend', function() {
-    updateCounts();
-});
+// Événements de mise à jour
+map.on('moveend zoomend', updateCounts);
 
-// Forcer l'injection après un délai car l'arbre Leaflet.Tree met du temps à se construire
 setTimeout(function() {
     injectLegendCheckboxes();
     applyTypeFilter();
-    updateCounts();
-}, 1200);
+}, 800);
         // ===== FIN FILTRES =====
         </script>        
     </body>
