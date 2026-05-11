@@ -346,6 +346,9 @@
         });
         bounds_group.addLayer(layer_Typetablissement_3);
         map.addLayer(layer_Typetablissement_3);
+            map.on('moveend zoomend', function() {
+    updateCountPanel();
+});
 
         const url = {
             "Nominatim OSM": "https://nominatim.openstreetmap.org/search?format=geojson&addressdetails=1&",
@@ -464,24 +467,26 @@
          * pour avoir les totaux bruts, puis applique le filtre pour le "total affiché".
          */
         function computeCounts() {
-            var counts = {
-                'Ecole primaire':   0,
-                'Ecole maternelle': 0,
-                'Collège':          0,
-                'Lycée':            0,
-                'Autre':            0
-            };
-            layer_Typetablissement_3.eachLayer(function(marker) {
-                if (!marker.feature || !marker.feature.properties) return;
-                var t = marker.feature.properties['Type_etab'] || 'Autre';
-                if (counts.hasOwnProperty(t)) {
-                    counts[t]++;
-                } else {
-                    counts['Autre']++;
-                }
-            });
-            return counts;
+    var counts = {
+        'Ecole primaire':   0,
+        'Ecole maternelle': 0,
+        'Collège':          0,
+        'Lycée':            0,
+        'Autre':            0
+    };
+    var bounds = map.getBounds(); // ← récupère la vue courante
+    layer_Typetablissement_3.eachLayer(function(marker) {
+        if (!marker.feature || !marker.feature.properties) return;
+        if (!bounds.contains(marker.getLatLng())) return; // ← hors écran = ignoré
+        var t = marker.feature.properties['Type_etab'] || 'Autre';
+        if (counts.hasOwnProperty(t)) {
+            counts[t]++;
+        } else {
+            counts['Autre']++;
         }
+    });
+    return counts;
+}
 
         /**
          * Met à jour le panneau de comptage selon les filtres actifs.
