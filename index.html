@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -13,128 +13,123 @@
         <link rel="stylesheet" href="css/leaflet-search.css">
         <link rel="stylesheet" href="css/leaflet.photon.css">
         <link rel="stylesheet" href="css/leaflet-measure.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
+
         <style>
-        html, body, #map {
-            width: 100%;
-            height: 100%;
-            padding: 0;
-            margin: 0;
-        }
+            html, body, #map {
+                width: 100%;
+                height: 100%;
+                padding: 0;
+                margin: 0;
+            }
 
-        /* ===== COMPTEUR : badges dans la légende ===== */
-        .etab-count-badge {
-            display: inline-block;
-            min-width: 22px;
-            padding: 1px 6px;
-            border-radius: 10px;
-            font-size: 11px;
-            font-weight: bold;
-            color: #fff;
-            background: #555;
-            text-align: center;
-            margin-left: 6px;
-            vertical-align: middle;
-            line-height: 16px;
-            transition: background 0.2s, opacity 0.2s;
-        }
-        .etab-count-badge.zero {
-            background: #bbb;
-            opacity: 0.6;
-        }
+            /* Style du titre flottant */
+            .map-header-title {
+                position: absolute;
+                top: 10px;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 1000;
+                background: rgba(255, 255, 255, 0.9);
+                padding: 12px 25px;
+                border-radius: 8px;
+                box-shadow: 0 2px 15px rgba(0,0,0,0.2);
+                border: 1px solid #1a237e;
+                text-align: center;
+                pointer-events: none;
+                min-width: 300px;
+            }
 
-        /* ===== PANNEAU TOTAL ===== */
-        #count-panel {
-            position: absolute;
-            bottom: 30px;
-            left: 10px;
-            z-index: 1000;
-            background: rgba(255,255,255,0.93);
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.22);
-            padding: 10px 14px 8px 14px;
-            font-family: Arial, sans-serif;
-            font-size: 13px;
-            min-width: 190px;
-            border-left: 4px solid #1a237e;
-        }
-        #count-panel h4 {
-            margin: 0 0 7px 0;
-            font-size: 13px;
-            color: #1a237e;
-            font-weight: bold;
-            letter-spacing: 0.02em;
-        }
-        #count-panel table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        #count-panel td {
-            padding: 2px 4px;
-            font-size: 12px;
-            color: #333;
-        }
-        #count-panel td.count-num {
-            text-align: right;
-            font-weight: bold;
-            padding-left: 12px;
-        }
-        #count-panel .count-dot {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            margin-right: 5px;
-            vertical-align: middle;
-        }
-        #count-panel tr.count-hidden td {
-            opacity: 0.4;
-            text-decoration: line-through;
-        }
-        #count-panel .count-total-row td {
-            border-top: 1px solid #e0e0e0;
-            margin-top: 4px;
-            padding-top: 5px;
-            font-weight: bold;
-            color: #1a237e;
-            font-size: 13px;
-        }
+            .map-header-title h1 {
+                margin: 0;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                font-size: 18px;
+                color: #1a237e;
+                font-weight: bold;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            /* Bouton Export Excel en bas à gauche */
+            #export-btn {
+                position: absolute;
+                bottom: 25px;
+                left: 10px;
+                z-index: 1000;
+                background: #2e7d32;
+                color: white;
+                border: 2px solid white;
+                padding: 12px 18px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-weight: bold;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                transition: all 0.2s ease;
+            }
+            #export-btn:hover {
+                background: #1b5e20;
+                transform: translateY(-2px);
+                box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+            }
+            #export-btn i { font-size: 18px; }
+
+            /* Légende et badges */
+            .legend-title {
+                font-weight: bold;
+                font-size: 14px;
+                color: #1a237e;
+                margin-bottom: 8px;
+                display: block;
+                border-bottom: 2px solid #1a237e;
+                padding-bottom: 3px;
+            }
+
+            .leaflet-layerstree-header-pointer { cursor: default !important; }
+            .leaflet-layerstree-header-pointer span { display: none !important; }
+
+            .etab-count-badge {
+                display: inline-block;
+                min-width: 22px;
+                padding: 1px 6px;
+                border-radius: 10px;
+                font-size: 11px;
+                font-weight: bold;
+                color: #fff;
+                background: #555;
+                text-align: center;
+                margin-left: 6px;
+                vertical-align: middle;
+                line-height: 16px;
+            }
+            .etab-count-badge.zero { background: #bbb; opacity: 0.6; }
+
+            /* Adaptation mobile */
+            @media (max-width: 600px) {
+                .map-header-title {
+                    width: 90%;
+                    padding: 8px 15px;
+                    top: 5px;
+                }
+                .map-header-title h1 { font-size: 14px; }
+                #export-btn { bottom: 30px; padding: 10px 14px; font-size: 13px; }
+            }
         </style>
         <title>Les écoles à proximité des Voies SNCF (Grand Est)</title>
     </head>
     <body>
-        <div id="map"></div>
-
-        <!-- ===== PANNEAU COMPTAGE ===== -->
-        <div id="count-panel">
-            <h4>📊 Écoles affichées</h4>
-            <table id="count-table">
-                <tr data-type="Ecole primaire">
-                    <td><span class="count-dot" style="background:#33A02C;"></span>Primaires</td>
-                    <td class="count-num"><span class="count-val">–</span></td>
-                </tr>
-                <tr data-type="Ecole maternelle">
-                    <td><span class="count-dot" style="background:#FDBF6F;border:1px solid #ccc;"></span>Maternelles</td>
-                    <td class="count-num"><span class="count-val">–</span></td>
-                </tr>
-                <tr data-type="Collège">
-                    <td><span class="count-dot" style="background:#1F78B4;"></span>Collèges</td>
-                    <td class="count-num"><span class="count-val">–</span></td>
-                </tr>
-                <tr data-type="Lycée">
-                    <td><span class="count-dot" style="background:#E31A1C;"></span>Lycées</td>
-                    <td class="count-num"><span class="count-val">–</span></td>
-                </tr>
-                <tr data-type="Autre">
-                    <td><span class="count-dot" style="background:#FD6FF2;border:1px solid #ccc;"></span>Autres</td>
-                    <td class="count-num"><span class="count-val">–</span></td>
-                </tr>
-                <tr class="count-total-row">
-                    <td>Total</td>
-                    <td class="count-num"><span id="count-total">–</span></td>
-                </tr>
-            </table>
+        <div class="map-header-title">
+            <h1>Les écoles à proximité des Voies SNCF (Grand Est)</h1>
         </div>
-        <!-- ===== FIN PANNEAU ===== -->
+
+        <button id="export-btn">
+            <i class="fas fa-file-excel"></i> EXPORTER LA SÉLECTION (EXCEL)
+        </button>
+
+        <div id="map"></div>
 
         <script src="js/qgis2web_expressions.js"></script>
         <script src="js/leaflet.js"></script>
@@ -149,28 +144,71 @@
         <script src="js/leaflet.photon.js"></script>
         <script src="js/leaflet-measure.js"></script>
         <script src="js/leaflet-search.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+        <!-- Bibliothèque XLSX pour l'export sans serveur -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
         <script src="data/geo_voies_2.js"></script>
         <script src="data/Typetablissement_3.js"></script>
+
         <script>
-        var map = L.map('map', {
-            zoomControl:false, maxZoom:28, minZoom:1
-        }).fitBounds([[47.58813635120763,7.537185090719699],[47.60294203369061,7.576745139155792]]);
+        // --- TRADUCTION FRANCAISE LEAFLET DRAW ---
+        L.drawLocal = {
+            draw: {
+                toolbar: {
+                    actions: { title: 'Annuler le dessin', text: 'Annuler' },
+                    finish: { title: 'Terminer le dessin', text: 'Terminer' },
+                    undo: { title: 'Supprimer le dernier point', text: 'Supprimer dernier point' },
+                    buttons: {
+                        polyline: 'Dessiner une ligne',
+                        polygon: 'Dessiner un polygone pour compter/exporter',
+                        rectangle: 'Dessiner un rectangle pour compter/exporter',
+                        circle: 'Dessiner un cercle',
+                        marker: 'Placer un marqueur',
+                        circlemarker: 'Placer un marqueur circulaire'
+                    }
+                },
+                handlers: {
+                    circle: { tooltip: { start: 'Cliquez et glissez pour dessiner un cercle.' } },
+                    circlemarker: { tooltip: { start: 'Cliquez sur la carte pour placer un marqueur circulaire.' } },
+                    marker: { tooltip: { start: 'Cliquez sur la carte pour placer un marqueur.' } },
+                    polygon: { tooltip: { start: 'Cliquez pour commencer à dessiner une zone.', cont: 'Cliquez pour continuer à dessiner la zone.', end: 'Cliquez sur le premier point pour fermer la zone.' } },
+                    polyline: { tooltip: { start: 'Cliquez pour commencer à dessiner une ligne.', cont: 'Cliquez pour continuer à dessiner la ligne.', end: 'Cliquez sur le dernier point pour terminer la ligne.' } },
+                    rectangle: { tooltip: { start: 'Cliquez et glissez pour dessiner un rectangle.' } },
+                    simpleshape: { tooltip: { end: 'Relâchez la souris pour finir le dessin.' } }
+                }
+            },
+            edit: {
+                toolbar: {
+                    actions: { save: { title: 'Enregistrer les modifications', text: 'Enregistrer' }, cancel: { title: 'Annuler les modifications', text: 'Annuler' }, clearAll: { title: 'Effacer toutes les zones', text: 'Tout effacer' } },
+                    buttons: { edit: 'Modifier la zone', editDisabled: 'Rien à modifier', remove: 'Supprimer la zone', removeDisabled: 'Rien à supprimer' }
+                },
+                handlers: {
+                    edit: { tooltip: { text: 'Faites glisser les poignées pour modifier la zone.', subtext: 'Cliquez sur annuler pour rejeter les modifications.' } },
+                    remove: { tooltip: { text: 'Cliquez sur une zone pour la supprimer.' } }
+                }
+            }
+        };
+
+        var map = L.map('map', { zoomControl:false, maxZoom:28, minZoom:1 })
+            .fitBounds([[47.58813635120763,7.537185090719699],[47.60294203369061,7.576745139155792]]);
+        
         var hash = new L.Hash(map);
-        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
         var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+
         function removeEmptyRowsFromPopupContent(content, feature) {
-         var tempDiv = document.createElement('div');
-         tempDiv.innerHTML = content;
-         var rows = tempDiv.querySelectorAll('tr');
-         for (var i = 0; i < rows.length; i++) {
-             var td = rows[i].querySelector('td.visible-with-data');
-             var key = td ? td.id : '';
-             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
-                 rows[i].parentNode.removeChild(rows[i]);
-             }
-         }
-         return tempDiv.innerHTML;
+            var tempDiv = document.createElement('div');
+            tempDiv.innerHTML = content;
+            var rows = tempDiv.querySelectorAll('tr');
+            for (var i = 0; i < rows.length; i++) {
+                var td = rows[i].querySelector('td.visible-with-data');
+                var key = td ? td.id : '';
+                if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                    rows[i].parentNode.removeChild(rows[i]);
+                }
+            }
+            return tempDiv.innerHTML;
         }
+
         function addClassToPopupIfMedia(content, popup) {
             var tempDiv = document.createElement('div');
             tempDiv.innerHTML = content;
@@ -182,401 +220,229 @@
                     setTimeout(function() { popup.update(); }, 10);
                 } else if (/\.(mp3|wav|ogg|aac)$/i.test(src)) {
                     var audio = document.createElement('audio');
-                    audio.controls = true;
-                    audio.src = src;
+                    audio.controls = true; audio.src = src;
                     imgTd.parentNode.replaceChild(audio, imgTd);
                     popup._contentNode.classList.add('media');
                     setTimeout(function() { popup.setContent(tempDiv.innerHTML); popup.update(); }, 10);
                 } else if (/\.(mp4|webm|ogg|mov)$/i.test(src)) {
                     var video = document.createElement('video');
-                    video.controls = true;
-                    video.src = src;
-                    video.style.width = "400px";
-                    video.style.height = "300px";
-                    video.style.maxHeight = "60vh";
-                    video.style.maxWidth = "60vw";
+                    video.controls = true; video.src = src;
+                    video.style.width = "400px"; video.style.height = "300px";
                     imgTd.parentNode.replaceChild(video, imgTd);
                     popup._contentNode.classList.add('media');
                     video.addEventListener('loadedmetadata', function() { popup.update(); });
                     setTimeout(function() { popup.setContent(tempDiv.innerHTML); popup.update(); }, 10);
-                } else {
-                    popup._contentNode.classList.remove('media');
                 }
-            } else {
-                popup._contentNode.classList.remove('media');
             }
         }
-        var title = new L.Control({'position':'topright'});
-        title.onAdd = function (map) {
-            this._div = L.DomUtil.create('div', 'info');
-            this.update();
-            return this._div;
-        };
-        title.update = function () {
-            this._div.innerHTML = '<h2>Les écoles à proximité des Voies SNCF (Grand Est)</h2>';
-        };
-        title.addTo(map);
-        var zoomControl = L.control.zoom({ position: 'topleft' }).addTo(map);
-        var measureControl = new L.Control.Measure({
-            position: 'topleft',
-            primaryLengthUnit: 'meters',
-            secondaryLengthUnit: 'kilometers',
-            primaryAreaUnit: 'sqmeters',
-            secondaryAreaUnit: 'hectares'
-        });
-        measureControl.addTo(map);
-        document.getElementsByClassName('leaflet-control-measure-toggle')[0].innerHTML = '';
-        document.getElementsByClassName('leaflet-control-measure-toggle')[0].className += ' fas fa-ruler';
-        var bounds_group = new L.featureGroup([]);
-        function setBounds() {}
+
+        // --- Couches de base ---
         map.createPane('pane_GoogleSatellite_0');
         map.getPane('pane_GoogleSatellite_0').style.zIndex = 400;
-        var layer_GoogleSatellite_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-            pane: 'pane_GoogleSatellite_0', opacity: 1.0,
-            attribution: '<a href="https://www.google.at/permissions/geoguidelines/attr-guide.html">Map data ©2015 Google</a>',
-            minZoom: 1, maxZoom: 28, minNativeZoom: 0, maxNativeZoom: 20
-        });
-        map.addLayer(layer_GoogleSatellite_0);
+        var layer_GoogleSatellite_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { pane: 'pane_GoogleSatellite_0', opacity: 1.0, minZoom: 1, maxZoom: 28 }).addTo(map);
+
         map.createPane('pane_GoogleTerrain_1');
         map.getPane('pane_GoogleTerrain_1').style.zIndex = 401;
-        var layer_GoogleTerrain_1 = L.tileLayer('https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}', {
-            pane: 'pane_GoogleTerrain_1', opacity: 1.0,
-            attribution: '<a href="https://www.google.at/permissions/geoguidelines/attr-guide.html">Map data ©2015 Google</a>',
-            minZoom: 1, maxZoom: 28, minNativeZoom: 0, maxNativeZoom: 20
-        });
-        map.addLayer(layer_GoogleTerrain_1);
+        var layer_GoogleTerrain_1 = L.tileLayer('https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}', { pane: 'pane_GoogleTerrain_1', opacity: 1.0, minZoom: 1, maxZoom: 28 }).addTo(map);
+
+        // --- Voies SNCF ---
         function pop_geo_voies_2(feature, layer) {
-            var popupContent = '<table>\
-                    <tr><td colspan="2">' + (feature.properties['id_armen'] !== null ? autolinker.link(String(feature.properties['id_armen']).replace(/'/g, '\'').toLocaleString()) : '') + '</td></tr>\
-                    <tr><td colspan="2">' + (feature.properties['id_ligne'] !== null ? autolinker.link(String(feature.properties['id_ligne']).replace(/'/g, '\'').toLocaleString()) : '') + '</td></tr>\
-                    <tr><td colspan="2">' + (feature.properties['pkd'] !== null ? autolinker.link(String(feature.properties['pkd']).replace(/'/g, '\'').toLocaleString()) : '') + '</td></tr>\
-                    <tr><td colspan="2">' + (feature.properties['pkf'] !== null ? autolinker.link(String(feature.properties['pkf']).replace(/'/g, '\'').toLocaleString()) : '') + '</td></tr>\
-                    <tr><td colspan="2">' + (feature.properties['voie'] !== null ? autolinker.link(String(feature.properties['voie']).replace(/'/g, '\'').toLocaleString()) : '') + '</td></tr>\
-                    <tr><td colspan="2">' + (feature.properties['qualite'] !== null ? autolinker.link(String(feature.properties['qualite']).replace(/'/g, '\'').toLocaleString()) : '') + '</td></tr>\
-                    <tr><td colspan="2">' + (feature.properties['date_maj'] !== null ? autolinker.link(String(feature.properties['date_maj']).replace(/'/g, '\'').toLocaleString()) : '') + '</td></tr>\
-                    <tr><td colspan="2">' + (feature.properties['source'] !== null ? autolinker.link(String(feature.properties['source']).replace(/'/g, '\'').toLocaleString()) : '') + '</td></tr>\
-                    <tr><td colspan="2">' + (feature.properties['observations'] !== null ? autolinker.link(String(feature.properties['observations']).replace(/'/g, '\'').toLocaleString()) : '') + '</td></tr>\
-                    <tr><td colspan="2">' + (feature.properties['garde'] !== null ? autolinker.link(String(feature.properties['garde']).replace(/'/g, '\'').toLocaleString()) : '') + '</td></tr>\
-                    <tr><td colspan="2">' + (feature.properties['vs'] !== null ? autolinker.link(String(feature.properties['vs']).replace(/'/g, '\'').toLocaleString()) : '') + '</td></tr>\
-                    <tr><td colspan="2">' + (feature.properties['id_li'] !== null ? autolinker.link(String(feature.properties['id_li']).replace(/'/g, '\'').toLocaleString()) : '') + '</td></tr>\
-                    <tr><td colspan="2">' + (feature.properties['osm_id'] !== null ? autolinker.link(String(feature.properties['osm_id']).replace(/'/g, '\'').toLocaleString()) : '') + '</td></tr>\
-                    <tr><td colspan="2">' + (feature.properties['osm_type'] !== null ? autolinker.link(String(feature.properties['osm_type']).replace(/'/g, '\'').toLocaleString()) : '') + '</td></tr>\
-                    <tr><td colspan="2">' + (feature.properties['long'] !== null ? autolinker.link(String(feature.properties['long']).replace(/'/g, '\'').toLocaleString()) : '') + '</td></tr>\
-                </table>';
+            var popupContent = '<table>' +
+                '<tr><td colspan="2">' + (feature.properties['id_armen'] !== null ? autolinker.link(String(feature.properties['id_armen']).toLocaleString()) : '') + '</td></tr>' +
+                '<tr><td colspan="2">' + (feature.properties['voie'] !== null ? autolinker.link(String(feature.properties['voie']).toLocaleString()) : '') + '</td></tr>' +
+                '</table>';
             var content = removeEmptyRowsFromPopupContent(popupContent, feature);
             layer.on('popupopen', function(e) { addClassToPopupIfMedia(content, e.popup); });
             layer.bindPopup(content, { maxHeight: 400 });
         }
-       function style_geo_voies_2_0() {
-    return {
-        pane: 'pane_geo_voies_2', opacity: 1,
-        color: '#000000', // ← Nouvelle couleur (noir)
-        dashArray: '', lineCap: 'square', lineJoin: 'bevel',
-        weight: 3.0, fillOpacity: 0, interactive: false,
-    };
-}
+
         map.createPane('pane_geo_voies_2');
         map.getPane('pane_geo_voies_2').style.zIndex = 402;
-        map.getPane('pane_geo_voies_2').style['mix-blend-mode'] = 'normal';
         var layer_geo_voies_2 = new L.geoJson(json_geo_voies_2, {
-            attribution: '', interactive: false,
-            dataVar: 'json_geo_voies_2', layerName: 'layer_geo_voies_2',
-            pane: 'pane_geo_voies_2', onEachFeature: pop_geo_voies_2,
-            style: style_geo_voies_2_0,
-        });
-        bounds_group.addLayer(layer_geo_voies_2);
-        map.addLayer(layer_geo_voies_2);
+            pane: 'pane_geo_voies_2',
+            style: { color: '#000000', weight: 3.0, interactive: false },
+            onEachFeature: pop_geo_voies_2
+        }).addTo(map);
+
+        // --- Établissements (Version avec Street View Link) ---
         function makeStyledPopup(p) {
             var statutColor = '#2196F3', statutIcon = '🏛️';
-            if (p['statut_public_prive'] && p['statut_public_prive'].toLowerCase().includes('priv')) {
-                statutColor = '#9C27B0'; statutIcon = '🏫';
-            }
-            var typeColors = {'Ecole primaire':'#33A02C','Ecole maternelle':'#FDBF6F','Collège':'#1F78B4','Lycée':'#E31A1C','Autre':'#FD6FF2'};
-            var typeColor = typeColors[p['Type_etab']] || '#999';
-            var adresse = p['adresse_1'] || '';
-            if (p['adresse_2']) adresse += '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + p['adresse_2'];
-            if (p['adresse_3']) adresse += '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + p['adresse_3'];
-            if (p['code_postal'] || p['nom_commune']) adresse += '<br>&nbsp;&nbsp;&nbsp;&nbsp;' + (p['code_postal']||'') + ' ' + (p['nom_commune']||'');
-            return '<div style="font-family:Arial,sans-serif;min-width:260px;max-width:300px;padding:5px;">' +
-                '<div style="font-size:17px;font-weight:bold;color:#1a237e;margin-bottom:8px;line-height:1.3;">🏫 ' + (p['nom_etablissement']||'N/A') + '</div>' +
-                '<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">' +
+            if (p['statut_public_prive'] && p['statut_public_prive'].toLowerCase().includes('priv')) { statutColor = '#9C27B0'; statutIcon = '🏫'; }
+            var typeColorsPopup = {'Ecole primaire':'#33A02C','Ecole maternelle':'#FDBF6F','Collège':'#1F78B4','Lycée':'#E31A1C','Autre':'#FD6FF2'};
+            var typeColor = typeColorsPopup[p['Type_etab']] || '#999';
+            
+            var adresse = (p['adresse_1'] || '') + ' ' + (p['code_postal']||'') + ' ' + (p['nom_commune']||'');
+            var svLink = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(adresse);
+
+            return '<div style="font-family:Arial,sans-serif;min-width:260px;padding:5px;">' +
+                '<div style="font-size:17px;font-weight:bold;color:#1a237e;margin-bottom:8px;">🏫 ' + (p['nom_etablissement']||'N/A') + '</div>' +
+                
+                '<a href="' + svLink + '" target="_blank" style="text-decoration:none;">' +
+                    '<div style="width:100%; background:#f1f3f4; border:1px solid #dadce0; border-radius:8px; padding:10px; margin-bottom:12px; display:flex; align-items:center; justify-content:center; gap:10px; color:#1a73e8; font-weight:bold;">' +
+                        '<i class="fas fa-street-view" style="font-size:20px;"></i>' +
+                        '<span>Voir sur Google Maps / Street View ↗</span>' +
+                    '</div>' +
+                '</a>' +
+
+                '<div style="display:flex;gap:6px;margin-bottom:10px;">' +
                     '<span style="background:' + statutColor + ';color:white;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:bold;">' + statutIcon + ' ' + (p['statut_public_prive']||'N/A') + '</span>' +
                     '<span style="background:' + typeColor + ';color:white;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:bold;">📋 ' + (p['Type_etab']||'N/A') + '</span>' +
                 '</div>' +
                 '<hr style="border:none;border-top:1px solid #e0e0e0;margin:6px 0;">' +
                 '<div style="font-size:13px;color:#444;margin-bottom:6px;">📍 ' + adresse + '</div>' +
-                '<div style="font-size:15px;font-weight:bold;color:#c62828;margin-bottom:5px;">📞 ' + (p['telephone']||'Non renseigné') + '</div>' +
-                '<div style="font-size:13px;color:#444;margin-bottom:5px;">✉️ <a href="mailto:' + (p['mail']||'') + '" style="color:#1565C0;">' + (p['mail']||'Non renseigné') + '</a></div>' +
-                '<div style="font-size:11px;color:#888;margin-top:8px;border-top:1px solid #eee;padding-top:5px;">📅 Ouverture : ' + (p['date_ouverture']||'N/A') + '</div>' +
+                '<div style="font-size:15px;font-weight:bold;color:#c62828;">📞 ' + (p['telephone']||'Non renseigné') + '</div>' +
+                '<div style="font-size:13px;">✉️ <a href="mailto:' + (p['mail']||'') + '">' + (p['mail']||'Non renseigné') + '</a></div>' +
             '</div>';
         }
-        function pop_Typetablissement_3(feature, layer) {
-            var content = makeStyledPopup(feature.properties);
-            layer.on('popupopen', function(e) { addClassToPopupIfMedia(content, e.popup); });
-            layer.bindPopup(content, { maxHeight: 400 });
-        }
-        function style_Typetablissement_3_0(feature) {
-            var context = { feature: feature, variables: {} };
-            if (exp_Typetablissement_3rule0_eval_expression(context)) {
-                return { pane:'pane_Typetablissement_3', radius:8.0, opacity:1, color:'rgba(35,35,35,1.0)', dashArray:'', lineCap:'butt', lineJoin:'miter', weight:1, fill:true, fillOpacity:1, fillColor:'rgba(51,160,44,1.0)', interactive:true };
-            } else if (exp_Typetablissement_3rule1_eval_expression(context)) {
-                return { pane:'pane_Typetablissement_3', radius:8.0, opacity:1, color:'rgba(35,35,35,1.0)', dashArray:'', lineCap:'butt', lineJoin:'miter', weight:1, fill:true, fillOpacity:1, fillColor:'rgba(31,120,180,1.0)', interactive:true };
-            } else if (exp_Typetablissement_3rule2_eval_expression(context)) {
-                return { pane:'pane_Typetablissement_3', radius:8.0, opacity:1, color:'rgba(35,35,35,1.0)', dashArray:'', lineCap:'butt', lineJoin:'miter', weight:1, fill:true, fillOpacity:1, fillColor:'rgba(227,26,28,1.0)', interactive:true };
-            } else if (exp_Typetablissement_3rule3_eval_expression(context)) {
-                return { pane:'pane_Typetablissement_3', radius:8.0, opacity:1, color:'rgba(35,35,35,1.0)', dashArray:'', lineCap:'butt', lineJoin:'miter', weight:1, fill:true, fillOpacity:1, fillColor:'rgba(253,191,111,1.0)', interactive:true };
-            } else if (exp_Typetablissement_3rule4_eval_expression(context)) {
-                return { pane:'pane_Typetablissement_3', radius:8.0, opacity:1, color:'rgba(35,35,35,1.0)', dashArray:'', lineCap:'butt', lineJoin:'miter', weight:1, fill:true, fillOpacity:1, fillColor:'rgba(253,111,242,1.0)', interactive:true };
-            } else {
-                return {fill: false, stroke: false};
-            }
-        }
+
         map.createPane('pane_Typetablissement_3');
         map.getPane('pane_Typetablissement_3').style.zIndex = 403;
-        map.getPane('pane_Typetablissement_3').style['mix-blend-mode'] = 'normal';
         var layer_Typetablissement_3 = new L.geoJson(json_Typetablissement_3, {
-            attribution: '', interactive: true,
-            dataVar: 'json_Typetablissement_3', layerName: 'layer_Typetablissement_3',
             pane: 'pane_Typetablissement_3',
-            onEachFeature: pop_Typetablissement_3,
-            pointToLayer: function (feature, latlng) {
-                var context = { feature: feature, variables: {} };
-                return L.circleMarker(latlng, style_Typetablissement_3_0(feature));
+            onEachFeature: function(feature, layer) {
+                var content = makeStyledPopup(feature.properties);
+                layer.on('popupopen', function(e) { addClassToPopupIfMedia(content, e.popup); });
+                layer.bindPopup(content, { maxHeight: 400 });
             },
-        });
-        bounds_group.addLayer(layer_Typetablissement_3);
-        map.addLayer(layer_Typetablissement_3);
-            map.on('moveend zoomend', function() {
-    updateCountPanel();
-});
-
-        const url = {
-            "Nominatim OSM": "https://nominatim.openstreetmap.org/search?format=geojson&addressdetails=1&",
-            "France BAN": "https://api-adresse.data.gouv.fr/search/?"
-        };
-        var photonControl = L.control.photon({
-            url: url["France BAN"],
-            feedbackLabel: '', position: 'topleft',
-            includePosition: true, initial: true,
+            pointToLayer: function (feature, latlng) {
+                var t = feature.properties['Type_etab'];
+                var c = 'rgba(253,111,242,1.0)';
+                if (t==='Ecole primaire') c='rgba(51,160,44,1.0)';
+                else if (t==='Collège') c='rgba(31,120,180,1.0)';
+                else if (t==='Lycée') c='rgba(227,26,28,1.0)';
+                else if (t==='Ecole maternelle') c='rgba(253,191,111,1.0)';
+                return L.circleMarker(latlng, { radius:8, opacity:1, color:'#232323', weight:1, fill:true, fillOpacity:1, fillColor:c, interactive:true });
+            }
         }).addTo(map);
-        photonControl._container.childNodes[0].style.borderRadius="10px";
-        var x = null, marker = null, z = null;
-        photonControl.on('selected', function(e) {
-            if (x != null) { map.removeLayer(obj3.marker); map.removeLayer(x); }
-            obj2.gcd = e.choice;
-            x = L.geoJSON(obj2.gcd).addTo(map);
-            var label = typeof obj2.gcd.properties.label === 'undefined' ? obj2.gcd.properties.display_name : obj2.gcd.properties.label;
-            obj3.marker = L.marker(x.getLayers()[0].getLatLng()).bindPopup(label).addTo(map);
-            map.setView(x.getLayers()[0].getLatLng(), 17);
-            z = typeof e.choice.properties.label === 'undefined'? e.choice.properties.display_name : e.choice.properties.label;
-            e.target.input.value = z;
+
+        // --- Outils de Dessin ---
+        var drawnItems = new L.FeatureGroup().addTo(map);
+        new L.Control.Draw({
+            draw: { polygon: true, rectangle: true, circle: false, marker: false, circlemarker: false, polyline: false },
+            edit: { featureGroup: drawnItems, remove: true }
+        }).addTo(map);
+
+        var currentSelection = null;
+        map.on(L.Draw.Event.CREATED, function (e) {
+            drawnItems.clearLayers();
+            currentSelection = e.layer;
+            drawnItems.addLayer(currentSelection);
+            updateCounters();
         });
-        var search = document.getElementsByClassName("leaflet-photon leaflet-control")[0];
-        search.classList.add("leaflet-control-search");
-        search.style.display = "flex";
-        search.style.backgroundColor="rgba(255,255,255,0.5)";
-        var button = document.createElement("div");
-        button.id = "gcd-button-control";
-        button.className = "gcd-gl-btn fa fa-search search-button";
-        search.insertBefore(button, search.firstChild);
-        var last = search.lastChild;
-        last.style.display = "none";
-        button.addEventListener("click", function (e) {
-            last.style.display = (last.style.display === "none") ? "block" : "none";
-        });
+        map.on(L.Draw.Event.DELETED, function () { currentSelection = null; updateCounters(); });
 
-        var overlaysTree = [
-            {label: 'Type établissement<br /><table><tr><td style="text-align: center;"><img src="legend/Typetablissement_3_Primaires0.png" /></td><td>Primaires</td></tr><tr><td style="text-align: center;"><img src="legend/Typetablissement_3_Collèges1.png" /></td><td>Collèges</td></tr><tr><td style="text-align: center;"><img src="legend/Typetablissement_3_Lycées2.png" /></td><td>Lycées</td></tr><tr><td style="text-align: center;"><img src="legend/Typetablissement_3_Maternelle3.png" /></td><td>Maternelle</td></tr><tr><td style="text-align: center;"><img src="legend/Typetablissement_3_Autres4.png" /></td><td>Autres</td></tr></table>', layer: layer_Typetablissement_3},
-            {label: '<img src="legend/geo_voies_2.png" /> Voies SNCF', layer: layer_geo_voies_2},
-            {label: "Google Terrain", layer: layer_GoogleTerrain_1},
-            {label: "Google Satellite", layer: layer_GoogleSatellite_0},
-        ];
-        var lay = L.control.layers.tree(null, overlaysTree, { collapsed: false });
-        lay.addTo(map);
+        // --- Logique de Filtrage, Comptage et Export ---
+        var typeFilterState = { 'Ecole primaire':true, 'Ecole maternelle':true, 'Collège':true, 'Lycée':true, 'Autre':true };
+        var legendToType = { 'Primaires':'Ecole primaire', 'Maternelle':'Ecole maternelle', 'Collèges':'Collège', 'Lycées':'Lycée', 'Autres':'Autre' };
+        var typeColors = { 'Ecole primaire':'#33A02C', 'Ecole maternelle':'#c8930a', 'Collège':'#1F78B4', 'Lycée':'#E31A1C', 'Autre':'#c060d0' };
 
-        document.addEventListener("DOMContentLoaded", function() {
-            function newLayersListHeight() {
-                var layerScrollbarElement = document.querySelector('.leaflet-control-layers-scrollbar');
-                if (layerScrollbarElement) {
-                    var layersListElement = document.querySelector('.leaflet-control-layers-list');
-                    var originalHeight = layersListElement.style.height || window.getComputedStyle(layersListElement).height;
-                    var newHeight = parseFloat(originalHeight) - 50;
-                    layersListElement.style.height = newHeight + 'px';
-                }
+        function isPointInPolygon(latlng, layer) {
+            var pts = layer.getLatLngs()[0];
+            if (Array.isArray(pts[0])) pts = pts[0];
+            var x = latlng.lat, y = latlng.lng, inside = false;
+            for (var i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+                var xi = pts[i].lat, yi = pts[i].lng, xj = pts[j].lat, yj = pts[j].lng;
+                var intersect = ((yi > y) != (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+                if (intersect) inside = !inside;
             }
-            var isLayersListExpanded = true;
-            var controlLayersElement = document.querySelector('.leaflet-control-layers');
-            var toggleLayerControl = document.querySelector('.leaflet-control-layers-toggle');
-            toggleLayerControl.addEventListener('click', function() {
-                if (isLayersListExpanded) {
-                    controlLayersElement.classList.remove('leaflet-control-layers-expanded');
-                } else {
-                    controlLayersElement.classList.add('leaflet-control-layers-expanded');
-                }
-                isLayersListExpanded = !isLayersListExpanded;
-                newLayersListHeight();
-            });
-            if (controlLayersElement) {
-                controlLayersElement.addEventListener('click', function(event) {
-                    var toggleLayerHeaderPointer = event.target.closest('.leaflet-layerstree-header-pointer span');
-                    if (toggleLayerHeaderPointer) { newLayersListHeight(); }
-                });
-            }
-            setTimeout(function() { toggleLayerControl.click(); }, 10);
-            setTimeout(function() { toggleLayerControl.click(); }, 10);
-            var isSmallScreen = window.innerWidth < 650;
-            if (isSmallScreen) {
-                setTimeout(function() {
-                    controlLayersElement.classList.remove('leaflet-control-layers-expanded');
-                    isLayersListExpanded = !isLayersListExpanded;
-                }, 500);
-            }
-        });
-
-        setBounds();
-
-        // ===== FILTRES + COMPTAGE =====
-
-        var typeFilterState = {
-            'Ecole primaire':   true,
-            'Ecole maternelle': true,
-            'Collège':          true,
-            'Lycée':            true,
-            'Autre':            true
-        };
-
-        var legendToType = {
-            'Primaires':  'Ecole primaire',
-            'Maternelle': 'Ecole maternelle',
-            'Collèges':   'Collège',
-            'Lycées':     'Lycée',
-            'Autres':     'Autre'
-        };
-
-        // Couleurs par type (pour les badges dans la légende)
-        var typeColors = {
-            'Ecole primaire':   '#33A02C',
-            'Ecole maternelle': '#c8930a',
-            'Collège':          '#1F78B4',
-            'Lycée':            '#E31A1C',
-            'Autre':            '#c060d0'
-        };
-
-        /**
-         * Compte les marqueurs par type (tous features, indépendamment du filtre visibilité)
-         * pour avoir les totaux bruts, puis applique le filtre pour le "total affiché".
-         */
-        function computeCounts() {
-    var counts = {
-        'Ecole primaire':   0,
-        'Ecole maternelle': 0,
-        'Collège':          0,
-        'Lycée':            0,
-        'Autre':            0
-    };
-    var bounds = map.getBounds(); // ← récupère la vue courante
-    layer_Typetablissement_3.eachLayer(function(marker) {
-        if (!marker.feature || !marker.feature.properties) return;
-        if (!bounds.contains(marker.getLatLng())) return; // ← hors écran = ignoré
-        var t = marker.feature.properties['Type_etab'] || 'Autre';
-        if (counts.hasOwnProperty(t)) {
-            counts[t]++;
-        } else {
-            counts['Autre']++;
+            return inside;
         }
-    });
-    return counts;
-}
 
-        /**
-         * Met à jour le panneau de comptage selon les filtres actifs.
-         */
-        function updateCountPanel() {
-            var allCounts = computeCounts();
-            var total = 0;
-
-            // Panneau bas-gauche
-            var rows = document.querySelectorAll('#count-table tr[data-type]');
-            rows.forEach(function(row) {
-                var type = row.getAttribute('data-type');
-                var n = allCounts[type] || 0;
-                var visible = typeFilterState[type] !== false;
-                row.querySelector('.count-val').textContent = n;
-                if (visible) {
-                    row.classList.remove('count-hidden');
-                    total += n;
-                } else {
-                    row.classList.add('count-hidden');
+        function updateCounters() {
+            var counts = { 'Ecole primaire':0, 'Ecole maternelle':0, 'Collège':0, 'Lycée':0, 'Autre':0 };
+            var bounds = map.getBounds();
+            
+            layer_Typetablissement_3.eachLayer(function(m) {
+                var inside = currentSelection ? isPointInPolygon(m.getLatLng(), currentSelection) : bounds.contains(m.getLatLng());
+                if (inside) {
+                    var t = m.feature.properties['Type_etab'] || 'Autre';
+                    if (counts.hasOwnProperty(t)) counts[t]++; else counts['Autre']++;
                 }
             });
-            document.getElementById('count-total').textContent = total;
 
-            // Badges dans la légende (si déjà injectés)
-            document.querySelectorAll('.etab-count-badge').forEach(function(badge) {
-                var type = badge.getAttribute('data-type');
-                var n = allCounts[type] || 0;
-                badge.textContent = n;
-                badge.classList.toggle('zero', n === 0);
-                badge.style.background = typeColors[type] || '#555';
-                if (typeFilterState[type] === false) {
-                    badge.style.background = '#bbb';
-                    badge.style.opacity = '0.5';
-                } else {
-                    badge.style.opacity = '1';
-                }
+            document.querySelectorAll('.etab-count-badge').forEach(function(b) {
+                var type = b.getAttribute('data-type');
+                b.textContent = counts[type] || 0;
+                b.classList.toggle('zero', (counts[type] || 0) === 0);
             });
         }
 
         function applyTypeFilter() {
-            layer_Typetablissement_3.eachLayer(function(marker) {
-                if (!marker.feature || !marker.feature.properties) return;
-                var t = marker.feature.properties['Type_etab'] || '';
-                var show = typeFilterState[t] !== false;
-                if (marker.setStyle) marker.setStyle({opacity: show ? 0.9 : 0, fillOpacity: show ? 0.8 : 0});
-                if (marker._icon) marker._icon.style.display = show ? '' : 'none';
+            layer_Typetablissement_3.eachLayer(function(m) {
+                var show = typeFilterState[m.feature.properties['Type_etab']] !== false;
+                if (m.setStyle) m.setStyle({opacity: show?1:0, fillOpacity: show?1:0, interactive: show});
             });
-            updateCountPanel();
+            updateCounters();
         }
 
+        // --- Logique du Bouton Export Excel ---
+        document.getElementById('export-btn').onclick = function() {
+            var dataToExport = [];
+            var bounds = map.getBounds();
+            
+            layer_Typetablissement_3.eachLayer(function(layer) {
+                var feature = layer.feature;
+                // On vérifie si le type est actuellement activé dans les filtres
+                if (typeFilterState[feature.properties['Type_etab']] !== false) {
+                    var inside = currentSelection ? isPointInPolygon(layer.getLatLng(), currentSelection) : bounds.contains(layer.getLatLng());
+                    if (inside) {
+                        dataToExport.push(feature.properties);
+                    }
+                }
+            });
+
+            if (dataToExport.length === 0) {
+                alert("Aucun établissement trouvé dans la sélection actuelle.");
+                return;
+            }
+
+            // Conversion et téléchargement Excel
+            var ws = XLSX.utils.json_to_sheet(dataToExport);
+            var wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Écoles");
+            XLSX.writeFile(wb, "Export_Ecoles_SNCF.xlsx");
+        };
+
+        // --- Contrôles de l'interface ---
+        L.control.zoom({ position: 'topleft' }).addTo(map);
+        new L.Control.Measure({ position: 'topleft', primaryLengthUnit: 'meters' }).addTo(map);
+
+        var overlaysTree = [
+            {label: 'Type établissement<br /><table><tr><td><img src="legend/Typetablissement_3_Primaires0.png" /></td><td>Primaires</td></tr><tr><td><img src="legend/Typetablissement_3_Collèges1.png" /></td><td>Collèges</td></tr><tr><td><img src="legend/Typetablissement_3_Lycées2.png" /></td><td>Lycées</td></tr><tr><td><img src="legend/Typetablissement_3_Maternelle3.png" /></td><td>Maternelle</td></tr><tr><td><img src="legend/Typetablissement_3_Autres4.png" /></td><td>Autres</td></tr></table>', layer: layer_Typetablissement_3},
+            {label: 'Voies SNCF', layer: layer_geo_voies_2},
+            {label: "Google Terrain", layer: layer_GoogleTerrain_1},
+            {label: "Google Satellite", layer: layer_GoogleSatellite_0}
+        ];
+        L.control.layers.tree(null, overlaysTree, { collapsed: false }).addTo(map);
+
         function injectLegendCheckboxes() {
-            var tds = document.querySelectorAll('.leaflet-control-layers td');
-            tds.forEach(function(td) {
+            var layersContainer = document.querySelector('.leaflet-control-layers-list');
+            if (layersContainer && !document.getElementById('legend-header')) {
+                var header = document.createElement('div');
+                header.id = 'legend-header';
+                header.className = 'legend-title';
+                header.textContent = 'LÉGENDE';
+                layersContainer.prepend(header);
+            }
+
+            document.querySelectorAll('.leaflet-control-layers td').forEach(function(td) {
                 var label = td.textContent.trim();
                 if (legendToType[label] && !td.querySelector('input')) {
                     var typeVal = legendToType[label];
-
-                    // Badge comptage
                     var badge = document.createElement('span');
-                    badge.className = 'etab-count-badge';
-                    badge.setAttribute('data-type', typeVal);
-                    badge.textContent = '–';
-                    badge.style.background = typeColors[typeVal] || '#555';
+                    badge.className = 'etab-count-badge'; badge.setAttribute('data-type', typeVal);
+                    badge.textContent = '0'; badge.style.background = typeColors[typeVal];
                     td.appendChild(badge);
-
-                    // Checkbox filtre
                     var cb = document.createElement('input');
-                    cb.type = 'checkbox';
-                    cb.checked = true;
-                    cb.title = 'Afficher / masquer';
-                    cb.style.cssText = 'cursor:pointer;margin-left:6px;vertical-align:middle;width:14px;height:14px;';
-                    cb.addEventListener('change', function(e) {
-                        e.stopPropagation();
-                        typeFilterState[typeVal] = cb.checked;
-                        td.closest('tr').style.opacity = cb.checked ? '1' : '0.4';
-                        applyTypeFilter();
-                    });
-                    cb.addEventListener('click', function(e) { e.stopPropagation(); });
+                    cb.type = 'checkbox'; cb.checked = true; cb.style.marginLeft = '6px';
+                    cb.onclick = function(e) { e.stopPropagation(); typeFilterState[typeVal] = cb.checked; applyTypeFilter(); };
                     td.appendChild(cb);
                 }
             });
         }
 
-        setTimeout(function() {
-            injectLegendCheckboxes();
-            applyTypeFilter(); // initialise compteurs + filtre
-        }, 800);
-
-        // ===== FIN FILTRES + COMPTAGE =====
+        map.on('moveend zoomend', updateCounters);
+        setTimeout(function() { injectLegendCheckboxes(); updateCounters(); }, 1000);
         </script>
     </body>
 </html>
