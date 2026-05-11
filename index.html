@@ -504,113 +504,61 @@
         setBounds();
                        // ===== FILTRES INTÉGRÉS DANS LA LÉGENDE =====
 
-        // ===== FILTRES AVEC COMPTAGE DYNAMIQUE ET INTERACTIF =====
+        // Etat des filtres (clé = valeur Type_etab de la couche Typetablissement)
+        var typeFilterState = {
+            'Ecole primaire':  true,
+            'Ecole maternelle': true,
+            'Collège':          true,
+            'Lycée':            true,
+            'Autre':            true
+        };
 
-var typeFilterState = {
-    'Ecole primaire':  true,
-    'Ecole maternelle': true,
-    'Collège':          true,
-    'Lycée':            true,
-    'Autre':            true
-};
+        // Correspondance légende → Type_etab (couche Typetablissement_3)
+        var legendToType = {
+            'Primaires':  'Ecole primaire',
+            'Maternelle': 'Ecole maternelle',
+            'Collèges':   'Collège',
+            'Lycées':     'Lycée',
+            'Autres':     'Autre'
+        };
 
-var legendToType = {
-    'Primaires':  'Ecole primaire',
-    'Maternelle': 'Ecole maternelle',
-    'Collèges':   'Collège',
-    'Lycées':     'Lycée',
-    'Autres':     'Autre'
-};
-
-function updateCounts() {
-    var counts = {
-        'Ecole primaire': 0, 'Ecole maternelle': 0, 'Collège': 0, 'Lycée': 0, 'Autre': 0
-    };
-
-    var bounds = map.getBounds();
-
-    // On compte uniquement ce qui est géographiquement dans la vue
-    layer_Typetablissement_3.eachLayer(function(l) {
-        if (l.feature && bounds.contains(l.getLatLng())) {
-            var t = l.feature.properties['Type_etab'];
-            if (counts.hasOwnProperty(t)) counts[t]++;
+        function applyTypeFilter() {
+            layer_Typetablissement_3.eachLayer(function(marker) {
+                if (!marker.feature || !marker.feature.properties) return;
+                var t = marker.feature.properties['Type_etab'] || '';
+                var show = typeFilterState[t] !== false;
+                if (marker.setStyle) marker.setStyle({opacity: show ? 0.9 : 0, fillOpacity: show ? 0.8 : 0});
+                if (marker._icon) marker._icon.style.display = show ? '' : 'none';
+            });
         }
-    });
 
-    // Mise à jour de l'affichage dans la légende sans toucher aux checkboxes
-    document.querySelectorAll('.leaflet-control-layers td').forEach(function(td) {
-        // On récupère le texte pur (sans le contenu des balises enfants)
-        var labelNode = Array.from(td.childNodes).find(n => n.nodeType === Node.TEXT_NODE);
-        if (labelNode) {
-            var labelText = labelNode.textContent.trim();
-            if (legendToType[labelText]) {
-                var typeVal = legendToType[labelText];
-                
-                // On crée ou met à jour le badge de comptage
-                var badge = td.querySelector('.count-badge');
-                if (!badge) {
-                    badge = document.createElement('span');
-                    badge.className = 'count-badge';
-                    badge.style.cssText = 'margin-left:5px; font-size:0.85em; font-weight:bold; color:#d32f2f;';
-                    td.appendChild(badge);
+        function injectLegendCheckboxes() {
+            var tds = document.querySelectorAll('.leaflet-control-layers td');
+            tds.forEach(function(td) {
+                var label = td.textContent.trim();
+                if (legendToType[label] && !td.querySelector('input')) {
+                    var typeVal = legendToType[label];
+                    var cb = document.createElement('input');
+                    cb.type = 'checkbox';
+                    cb.checked = true;
+                    cb.title = 'Afficher / masquer';
+                    cb.style.cssText = 'cursor:pointer;margin-left:5px;vertical-align:middle;width:14px;height:14px;';
+                    cb.addEventListener('change', function(e) {
+                        e.stopPropagation();
+                        typeFilterState[typeVal] = cb.checked;
+                        td.closest('tr').style.opacity = cb.checked ? '1' : '0.4';
+                        applyTypeFilter();
+                    });
+                    cb.addEventListener('click', function(e) { e.stopPropagation(); });
+                    td.appendChild(cb);
                 }
-                badge.textContent = ' (' + counts[typeVal] + ')';
-            }
-        }
-    });
-}
-
-function applyTypeFilter() {
-    layer_Typetablissement_3.eachLayer(function(marker) {
-        if (!marker.feature) return;
-        var t = marker.feature.properties['Type_etab'] || '';
-        var isChecked = typeFilterState[t] !== false;
-        
-        // On gère l'affichage sur la carte
-        if (marker.setStyle) {
-            marker.setStyle({
-                opacity: isChecked ? 1 : 0,
-                fillOpacity: isChecked ? 1 : 0,
-                interactive: isChecked // Empêche de cliquer sur un point invisible
             });
         }
-        if (marker._icon) marker._icon.style.display = isChecked ? '' : 'none';
-    });
-}
 
-function injectLegendCheckboxes() {
-    document.querySelectorAll('.leaflet-control-layers td').forEach(function(td) {
-        var labelText = td.textContent.trim();
-        if (legendToType[labelText] && !td.querySelector('input[type="checkbox"]')) {
-            var typeVal = legendToType[labelText];
-            
-            var cb = document.createElement('input');
-            cb.type = 'checkbox';
-            cb.checked = true;
-            cb.style.cssText = 'cursor:pointer; margin-right:8px; vertical-align:middle;';
-            
-            cb.addEventListener('change', function(e) {
-                e.stopPropagation();
-                typeFilterState[typeVal] = cb.checked;
-                // Effet visuel sur la ligne de la légende
-                td.closest('tr').style.opacity = cb.checked ? '1' : '0.5';
-                applyTypeFilter();
-            });
-
-            // On insère la checkbox AU DÉBUT du texte pour ne pas gêner
-            td.insertBefore(cb, td.firstChild);
-        }
-    });
-    updateCounts();
-}
-
-// Événements de mise à jour
-map.on('moveend zoomend', updateCounts);
-
-setTimeout(function() {
-    injectLegendCheckboxes();
-    applyTypeFilter();
-}, 800);
+        setTimeout(function() {
+            injectLegendCheckboxes();
+            applyTypeFilter();
+        }, 800);
         // ===== FIN FILTRES =====
         </script>        
     </body>
