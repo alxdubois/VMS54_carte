@@ -384,7 +384,7 @@
         // --- Outils de Dessin ---
         var drawnItems = new L.FeatureGroup().addTo(map);
         new L.Control.Draw({
-            draw: { polygon: true, rectangle: true, circle: false, marker: false, circlemarker: false, polyline: false },
+            draw: { polygon: true, rectangle: true, circle: true, marker: true, circlemarker: true, polyline: false },
             edit: { featureGroup: drawnItems, remove: true }
         }).addTo(map);
 
