@@ -311,7 +311,7 @@
                 else if (t==='Collège') c='rgba(31,120,180,1.0)';
                 else if (t==='Lycée') c='rgba(227,26,28,1.0)';
                 else if (t==='Ecole maternelle') c='rgba(253,191,111,1.0)';
-                return L.circleMarker(latlng, { radius:8, opacity:1, color:'#232323', weight:1, fill:true, fillOpacity:1, fillColor:c, interactive:true });
+                return L.circleMarker(latlng, { radius:8, opacity:1, color:'#232323', weight:1, fill:true, fillOpacity:0.5, fillColor:c, interactive:true });
             }
         }).addTo(map);
 
