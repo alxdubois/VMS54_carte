@@ -88,8 +88,73 @@
                 padding-bottom: 3px;
             }
 
+            /* Suppression des chevrons natifs de l'arbre (inutiles ici) */
             .leaflet-layerstree-header-pointer { cursor: default !important; }
             .leaflet-layerstree-header-pointer span { display: none !important; }
+
+            /* Panneau légende collapsible */
+            .legend-panel-wrapper {
+                position: absolute;
+                top: 80px;
+                right: 0;
+                z-index: 1000;
+                display: flex;
+                align-items: flex-start;
+            }
+
+            /* Onglet de toggle (la languette cliquable) */
+            #legend-toggle-tab {
+                background: rgba(26, 35, 126, 0.92);
+                color: white;
+                width: 28px;
+                min-height: 80px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                border-radius: 6px 0 0 6px;
+                box-shadow: -3px 2px 8px rgba(0,0,0,0.3);
+                writing-mode: vertical-rl;
+                text-orientation: mixed;
+                font-family: 'Segoe UI', sans-serif;
+                font-size: 12px;
+                font-weight: bold;
+                letter-spacing: 1.5px;
+                text-transform: uppercase;
+                padding: 12px 5px;
+                user-select: none;
+                transition: background 0.2s;
+                flex-shrink: 0;
+            }
+            #legend-toggle-tab:hover { background: rgba(26, 35, 126, 1); }
+
+            #legend-toggle-tab .toggle-arrow {
+                writing-mode: horizontal-tb;
+                font-size: 14px;
+                margin-top: 10px;
+                transition: transform 0.3s;
+            }
+            #legend-toggle-tab.collapsed .toggle-arrow {
+                transform: rotate(180deg);
+            }
+
+            /* Contenu du panneau légende */
+            #legend-panel-content {
+                background: rgba(255,255,255,0.97);
+                border: 1px solid #1a237e;
+                border-right: none;
+                border-radius: 6px 0 0 6px;
+                box-shadow: -3px 2px 10px rgba(0,0,0,0.2);
+                overflow: hidden;
+                max-width: 260px;
+                transition: max-width 0.3s ease, opacity 0.3s ease;
+                opacity: 1;
+            }
+            #legend-panel-content.collapsed {
+                max-width: 0;
+                opacity: 0;
+                pointer-events: none;
+            }
 
             .etab-count-badge {
                 display: inline-block;
@@ -311,7 +376,8 @@
                 else if (t==='Collège') c='rgba(31,120,180,1.0)';
                 else if (t==='Lycée') c='rgba(227,26,28,1.0)';
                 else if (t==='Ecole maternelle') c='rgba(253,191,111,1.0)';
-                return L.circleMarker(latlng, { radius:6, opacity:1, color:'#232323', weight:1, fill:true, fillOpacity:0.5, fillColor:c, interactive:true });
+                // CORRECTION : fillOpacity réduit de 1 à 0.75 pour une transparence partielle des icônes
+                return L.circleMarker(latlng, { radius:8, opacity:1, color:'#232323', weight:1, fill:true, fillOpacity:0.75, fillColor:c, interactive:true });
             }
         }).addTo(map);
 
@@ -370,7 +436,7 @@
         function applyTypeFilter() {
             layer_Typetablissement_3.eachLayer(function(m) {
                 var show = typeFilterState[m.feature.properties['Type_etab']] !== false;
-                if (m.setStyle) m.setStyle({opacity: show?1:0, fillOpacity: show?1:0, interactive: show});
+                if (m.setStyle) m.setStyle({opacity: show?1:0, fillOpacity: show?0.75:0, interactive: show});
             });
             updateCounters();
         }
@@ -413,10 +479,50 @@
             {label: "Google Terrain", layer: layer_GoogleTerrain_1},
             {label: "Google Satellite", layer: layer_GoogleSatellite_0}
         ];
-        L.control.layers.tree(null, overlaysTree, { collapsed: false }).addTo(map);
+        var layersTreeControl = L.control.layers.tree(null, overlaysTree, { collapsed: false });
+        layersTreeControl.addTo(map);
 
         function injectLegendCheckboxes() {
-            var layersContainer = document.querySelector('.leaflet-control-layers-list');
+            // --- Récupère le conteneur natif Leaflet et le réorganise dans notre wrapper ---
+            var nativeContainer = document.querySelector('.leaflet-control-layers');
+            if (!nativeContainer || document.getElementById('legend-toggle-tab')) return;
+
+            // Retire le conteneur natif de son parent Leaflet
+            nativeContainer.parentNode.removeChild(nativeContainer);
+
+            // Neutralise les styles de positionnement Leaflet sur le conteneur natif
+            nativeContainer.style.position = 'static';
+            nativeContainer.style.margin = '0';
+            nativeContainer.style.border = 'none';
+            nativeContainer.style.boxShadow = 'none';
+            nativeContainer.style.background = 'transparent';
+
+            // Crée le wrapper positionné
+            var wrapper = document.createElement('div');
+            wrapper.className = 'legend-panel-wrapper';
+
+            // Onglet toggle (languette)
+            var tab = document.createElement('div');
+            tab.id = 'legend-toggle-tab';
+            tab.innerHTML = 'LÉGENDE<span class="toggle-arrow">◄</span>';
+
+            // Panneau de contenu
+            var panel = document.createElement('div');
+            panel.id = 'legend-panel-content';
+            panel.appendChild(nativeContainer);
+
+            wrapper.appendChild(tab);
+            wrapper.appendChild(panel);
+            document.body.appendChild(wrapper);
+
+            // Toggle au clic
+            tab.addEventListener('click', function() {
+                var isCollapsed = panel.classList.toggle('collapsed');
+                tab.classList.toggle('collapsed', isCollapsed);
+            });
+
+            // Injecte le titre et les badges/checkboxes dans la légende
+            var layersContainer = nativeContainer.querySelector('.leaflet-control-layers-list');
             if (layersContainer && !document.getElementById('legend-header')) {
                 var header = document.createElement('div');
                 header.id = 'legend-header';
