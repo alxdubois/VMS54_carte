@@ -873,7 +873,80 @@
                 });
             });
         });
+// ============================================================
+        // EXTENSION : CALCUL DE DISTANCE SANS TOUCHER AU CODE ORIGINAL
+        // ============================================================
+        
+        // Fonction utilitaire pour calculer la distance la plus courte entre un point et une ligne (calcul géodésique Leaflet)
+        function getMinDistanceToLines(latlng, lineLayer) {
+            var minDistance = Infinity;
+            
+            lineLayer.eachLayer(function(layer) {
+                if (typeof layer.getLatLngs !== 'function') return;
+                var latlngs = layer.getLatLngs();
+                
+                // Gestion des MultiLineString ou LineString simples
+                function checkCoords(coords) {
+                    if (Array.isArray(coords) && coords[0] instanceof L.LatLng) {
+                        for (var i = 0; i < coords.length; i++) {
+                            var dist = latlng.distanceTo(coords[i]);
+                            if (dist < minDistance) minDistance = dist;
+                        }
+                    } else if (Array.isArray(coords)) {
+                        coords.forEach(checkCoords);
+                    }
+                }
+                checkCoords(latlngs);
+            });
+            
+            return minDistance;
+        }
 
+        // Écouteur global sur l'ouverture des popups pour injecter la distance
+        map.on('popupopen', function(e) {
+            var popup = e.popup;
+            var source = popup._source;
+            
+            // On vérifie que la popup provient bien d'un marqueur de la couche des établissements
+            if (source && source instanceof L.CircleMarker && source.feature && source.feature.properties && source.feature.properties['Type_etab']) {
+                var schoolLatLng = source.getLatLng();
+                
+                // Calcul de la distance minimale par rapport à la couche des voies SNCF (layer_geo_voies_2)
+                var rawDistance = getMinDistanceToLines(schoolLatLng, layer_geo_voies_2);
+                
+                if (rawDistance !== Infinity) {
+                    // Arrondi à 10 mètres près
+                    var roundedDistance = Math.round(rawDistance / 10) * 10;
+                    
+                    // Formatage de l'affichage (ex: 450 m ou 1.2 km)
+                    var distanceStr = "";
+                    if (roundedDistance >= 1000) {
+                        distanceStr = (roundedDistance / 1000).toFixed(2) + " km";
+                    } else {
+                        distanceStr = roundedDistance + " m";
+                    }
+                    
+                    // Construction du bloc HTML à injecter
+                    var distanceHtml = '<div style="font-size:13px; font-weight:bold; color:#E65100; margin-top:8px; border-top:1px dashed #ccc; padding-top:5px; display:flex; align-items:center; gap:5px;">' +
+                                       '🚄 Distance voie SNCF : ~ ' + distanceStr + 
+                                       '</div>';
+                    
+                    // Récupération du contenu actuel de la popup
+                    var currentContent = popup.getContent();
+                    
+                    // Si la distance n'a pas déjà été injectée (sécurité pour éviter les doublons)
+                    if (typeof currentContent === 'string' && !currentContent.includes('Distance voie SNCF')) {
+                        // On cherche la dernière balise </div> pour insérer notre bloc juste avant la fin du conteneur principal
+                        var lastDivIndex = currentContent.lastIndexOf('</div>');
+                        if (lastDivIndex !== -1) {
+                            var newContent = currentContent.substring(0, lastDivIndex) + distanceHtml + currentContent.substring(lastDivIndex);
+                            popup.setContent(newContent);
+                            popup.update(); // Force Leaflet à recalculer la taille de la bulle
+                        }
+                    }
+                }
+            }
+        });
         // ============================================================
         // FIN DU SCRIPT
         // ============================================================
